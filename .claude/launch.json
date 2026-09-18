@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "timebudget",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/Users/dame/timebudget-serve/serve.py"],
+      "port": 4322
+    }
+  ]
+}

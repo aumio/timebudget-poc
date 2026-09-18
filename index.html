@@ -1,0 +1,2422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timebudget — Desktop / Tablet / Mobile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+/* ---------- Tokens ---------- */
+:root {
+  --tb-primary: #4A6FE3;
+  --tb-primary-soft: #EDF1FE;
+  --tb-primary-deep: #3B5BC4;
+  --tb-accent: #3DCBC9;
+  --tb-warn: #F5D165;
+  --tb-warm: #F3A266;
+  --tb-danger: #E26B6B;
+  --tb-success: #3DCBC9;
+
+  --tb-text: #1A1F36;
+  --tb-text-mid: #5B6478;
+  --tb-text-muted: #8A93A6;
+  --tb-text-faint: #B6BCC9;
+  --tb-line: #E8EAF1;
+  --tb-line-strong: #D5D9E3;
+  --tb-surface: #FFFFFF;
+  --tb-bg: #FAFBFD;
+  --tb-bg-tint: #F4F5F9;
+
+  --tb-radius-sm: 8px;
+  --tb-radius: 12px;
+  --tb-radius-lg: 18px;
+  --tb-radius-xl: 24px;
+
+  --tb-shadow-sm: 0 1px 2px rgba(20, 27, 53, 0.04), 0 1px 1px rgba(20, 27, 53, 0.02);
+  --tb-shadow: 0 4px 12px rgba(20, 27, 53, 0.06), 0 1px 2px rgba(20, 27, 53, 0.03);
+  --tb-shadow-lg: 0 16px 40px rgba(20, 27, 53, 0.12), 0 4px 12px rgba(20, 27, 53, 0.06);
+
+  --tb-font: 'IBM Plex Sans', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+  --tb-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--tb-font);
+  background: var(--tb-bg);
+  color: var(--tb-text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+input, textarea, select { font-family: inherit; color: inherit; }
+input:focus, textarea:focus, select:focus, button:focus-visible { outline: 2px solid var(--tb-primary); outline-offset: 1px; }
+
+/* ---------- App shell ---------- */
+.tb-app {
+  min-height: 100vh;
+  background: var(--tb-bg);
+  color: var(--tb-text);
+}
+
+.tb-row { display: flex; align-items: center; }
+.tb-col { display: flex; flex-direction: column; }
+.tb-gap-2 { gap: 8px; } .tb-gap-3 { gap: 12px; } .tb-gap-4 { gap: 16px; } .tb-gap-6 { gap: 24px; }
+
+/* ---------- Buttons ---------- */
+.tb-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 500; font-size: 14px;
+  transition: background 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.tb-btn-primary { background: var(--tb-primary); color: white; box-shadow: 0 1px 2px rgba(74,111,227,0.25); }
+.tb-btn-primary:hover { background: var(--tb-primary-deep); }
+.tb-btn-primary:active { transform: translateY(1px); }
+.tb-btn-ghost { background: transparent; color: var(--tb-text-mid); border-color: var(--tb-line-strong); }
+.tb-btn-ghost:hover { background: var(--tb-bg-tint); color: var(--tb-text); }
+.tb-btn-danger-ghost { background: transparent; color: var(--tb-danger); border-color: #F4C7C7; }
+.tb-btn-danger-ghost:hover { background: #FDF2F2; }
+.tb-btn-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.tb-btn-lg { height: 48px; padding: 0 22px; font-size: 15px; }
+.tb-btn-icon { width: 36px; height: 36px; padding: 0; border-radius: 10px; color: var(--tb-text-mid); }
+.tb-btn-icon:hover { background: var(--tb-bg-tint); color: var(--tb-text); }
+
+/* ---------- Inputs ---------- */
+.tb-field { display: flex; flex-direction: column; gap: 6px; }
+.tb-field-label { font-size: 12px; font-weight: 500; color: var(--tb-text-mid); letter-spacing: 0.02em; }
+.tb-input {
+  height: 44px; padding: 0 14px;
+  background: var(--tb-bg-tint);
+  border: 1px solid transparent;
+  border-radius: var(--tb-radius);
+  font-size: 14px;
+  color: var(--tb-text);
+  transition: border 120ms ease, background 120ms ease;
+  width: 100%;
+}
+.tb-input:hover { background: #EEF0F6; }
+.tb-input:focus { background: var(--tb-surface); border-color: var(--tb-primary); outline: none; }
+.tb-input::placeholder { color: var(--tb-text-faint); }
+.tb-select-trigger {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 44px; padding: 0 14px;
+  background: var(--tb-bg-tint);
+  border-radius: var(--tb-radius);
+  font-size: 14px;
+  color: var(--tb-text);
+  width: 100%;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.tb-select-trigger:hover { background: #EEF0F6; }
+.tb-select-trigger .placeholder { color: var(--tb-text-faint); }
+
+/* ---------- Cards / surfaces ---------- */
+.tb-card {
+  background: var(--tb-surface);
+  border-radius: var(--tb-radius-lg);
+  border: 1px solid var(--tb-line);
+}
+
+/* ---------- Sidebar (Calm variant) ---------- */
+.tb-sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--tb-line);
+  background: var(--tb-surface);
+  display: flex; flex-direction: column;
+  padding: 22px 14px;
+  position: sticky; top: 0;
+  height: 100vh;
+}
+.tb-sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 6px 10px 22px; font-weight: 600; font-size: 16px; }
+.tb-sidebar-logo-mark {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--tb-primary);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 600;
+}
+.tb-sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+.tb-sidebar-section { font-size: 11px; font-weight: 500; color: var(--tb-text-faint); padding: 14px 12px 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+.tb-nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--tb-text-mid);
+  font-size: 14px; font-weight: 500;
+  transition: background 100ms ease, color 100ms ease;
+  cursor: pointer;
+  text-align: left;
+}
+.tb-nav-item:hover { background: var(--tb-bg-tint); color: var(--tb-text); }
+.tb-nav-item.active { background: var(--tb-primary-soft); color: var(--tb-primary); }
+.tb-nav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
+.tb-sidebar-foot { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--tb-line); }
+.tb-profile {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.tb-profile:hover { background: var(--tb-bg-tint); }
+.tb-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--tb-primary), var(--tb-accent));
+  color: white; font-weight: 600; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---------- Main column ---------- */
+.tb-main {
+  flex: 1;
+  min-width: 0;
+  display: flex; flex-direction: column;
+}
+.tb-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 32px;
+  border-bottom: 1px solid var(--tb-line);
+  background: var(--tb-surface);
+  position: sticky; top: 0; z-index: 10;
+}
+.tb-topbar h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.tb-topbar .subtle { color: var(--tb-text-muted); font-size: 13px; }
+
+.tb-content {
+  flex: 1;
+  padding: 28px 32px 60px;
+  display: flex; flex-direction: column; gap: 24px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ---------- Week strip ---------- */
+.tb-week {
+  display: flex; flex-direction: column; align-items: stretch; gap: 14px;
+}
+.tb-week-header {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.tb-week-arrow {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--tb-line);
+  color: var(--tb-text-mid);
+  background: var(--tb-surface);
+}
+.tb-week-arrow:hover { background: var(--tb-bg-tint); color: var(--tb-text); }
+.tb-week-date { font-size: 16px; font-weight: 600; min-width: 140px; text-align: center; }
+.tb-week-strip {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  background: var(--tb-bg-tint);
+  padding: 6px;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.tb-week-day {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.tb-week-day .dow { font-size: 11px; color: var(--tb-text-muted); font-weight: 500; }
+.tb-week-day .dn { font-size: 14px; font-weight: 600; margin-top: 2px; color: var(--tb-text); }
+.tb-week-day.active { background: var(--tb-primary); color: white; }
+.tb-week-day.active .dow, .tb-week-day.active .dn { color: white; }
+.tb-week-day:hover:not(.active) { background: white; }
+
+/* ---------- Dashboard layout ---------- */
+.tb-dashboard {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+@media (max-width: 1280px) {
+  .tb-dashboard { grid-template-columns: 1fr; }
+}
+
+.tb-hero {
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius-xl);
+  padding: 36px;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  position: relative;
+}
+.tb-hero-bold {
+  background: radial-gradient(circle at 50% 40%, #EDF1FE 0%, #FFFFFF 70%);
+  border: none;
+  padding: 56px 36px 40px;
+}
+
+.tb-hero h2 { margin: 0; font-size: 14px; font-weight: 500; color: var(--tb-text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+
+.tb-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* Donut */
+.tb-donut-wrap {
+  position: relative;
+  width: 320px; height: 320px;
+}
+.tb-donut-wrap.lg { width: 460px; height: 460px; max-width: 100%; }
+.tb-donut-wrap.sm { width: 220px; height: 220px; }
+.tb-donut-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.tb-donut-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+.tb-donut-label { font-size: 13px; color: var(--tb-text-muted); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 500; }
+.tb-donut-value { font-size: 56px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; margin: 6px 0; font-variant-numeric: tabular-nums; }
+.tb-donut-wrap.lg .tb-donut-value { font-size: 80px; }
+.tb-donut-wrap.sm .tb-donut-value { font-size: 32px; }
+.tb-donut-sub { font-size: 13px; color: var(--tb-text-mid); white-space: nowrap; }
+.tb-donut-seg { transition: stroke-dashoffset 600ms cubic-bezier(0.22, 1, 0.36, 1), stroke-width 200ms ease; }
+.tb-donut-track { stroke: var(--tb-line); }
+
+/* ---------- Task list ---------- */
+.tb-tasks-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.tb-tasks-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.tb-view-toggle { display: flex; background: var(--tb-bg-tint); border-radius: 10px; padding: 3px; gap: 2px; }
+.tb-view-toggle button { padding: 6px 10px; border-radius: 8px; color: var(--tb-text-muted); font-size: 13px; }
+.tb-view-toggle button.active { background: var(--tb-surface); color: var(--tb-text); box-shadow: var(--tb-shadow-sm); }
+
+.tb-tasks-list { display: flex; flex-direction: column; gap: 10px; }
+.tb-tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+
+.tb-task {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.tb-task:hover { border-color: var(--tb-line-strong); box-shadow: var(--tb-shadow-sm); }
+.tb-task.done { opacity: 0.7; }
+.tb-task.done .tb-task-name { text-decoration: line-through; color: var(--tb-text-muted); }
+.tb-task.dragging, .tb-task-card.dragging { opacity: 0.4; }
+.tb-task.over { border-top: 2px solid var(--tb-primary); }
+.tb-task-card.over { box-shadow: 0 0 0 2px var(--tb-primary); }
+
+.tb-drag-handle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 24px;
+  color: var(--tb-text-faint);
+  cursor: grab;
+  flex-shrink: 0;
+  border-radius: 4px;
+  margin-right: -4px;
+}
+.tb-drag-handle:hover { color: var(--tb-text-mid); background: var(--tb-bg-tint); }
+.tb-drag-handle:active { cursor: grabbing; }
+.tb-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--tb-line-strong);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 120ms ease;
+}
+.tb-check.checked { background: var(--tb-accent); border-color: var(--tb-accent); color: white; }
+.tb-task-swatch { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+.tb-task-body { flex: 1; min-width: 0; }
+.tb-task-name { font-size: 14px; font-weight: 600; margin: 0; }
+.tb-task-meta { font-size: 12px; color: var(--tb-text-muted); margin-top: 2px; display: flex; align-items: center; gap: 8px; }
+.tb-task-exceed { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; background: #FDF2F2; color: var(--tb-danger); font-size: 11px; font-weight: 500; margin-top: 6px; }
+
+.tb-task-card {
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius-lg);
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative;
+}
+.tb-task-card:hover { border-color: var(--tb-line-strong); box-shadow: var(--tb-shadow-sm); }
+.tb-task-card .tb-task-swatch { width: 100%; height: 4px; border-radius: 2px; margin-bottom: 4px; }
+
+/* ---------- Timeline ---------- */
+.tb-timeline {
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius-lg);
+  padding: 20px;
+}
+.tb-timeline-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.tb-timeline-head h4 { margin: 0; font-size: 15px; font-weight: 600; }
+.tb-timeline-bar {
+  position: relative;
+  height: 88px;
+  background: var(--tb-bg-tint);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tb-timeline-hours {
+  position: absolute; inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+.tb-timeline-hour {
+  flex: 1;
+  border-right: 1px dashed var(--tb-line);
+  position: relative;
+}
+.tb-timeline-hour:last-child { border-right: none; }
+.tb-timeline-hour span {
+  position: absolute; bottom: 4px; left: 4px;
+  font-size: 10px; color: var(--tb-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.tb-timeline-block {
+  position: absolute;
+  top: 12px;
+  bottom: 22px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: grab;
+  user-select: none;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.tb-timeline-block:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.14); transform: translateY(-1px); }
+.tb-timeline-block.dragging { cursor: grabbing; opacity: 0.85; z-index: 2; }
+.tb-timeline-block .tb-tb-title { font-weight: 600; font-size: 12px; line-height: 1.2; }
+.tb-timeline-block .tb-tb-time { font-size: 10px; opacity: 0.85; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+/* ---------- Right rail ---------- */
+.tb-rail { display: flex; flex-direction: column; gap: 16px; }
+.tb-rail-card {
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-line);
+  border-radius: var(--tb-radius-lg);
+  padding: 18px;
+}
+.tb-rail-card h4 { margin: 0 0 12px; font-size: 14px; font-weight: 600; }
+.tb-stat-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+.tb-stat-row .label { color: var(--tb-text-mid); }
+.tb-stat-row .val { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.tb-mini-bars { display: flex; gap: 4px; align-items: flex-end; height: 80px; padding-top: 6px; }
+.tb-mini-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tb-mini-bar { width: 100%; max-width: 14px; background: var(--tb-primary-soft); border-radius: 3px; transition: height 300ms ease; }
+.tb-mini-bar-col .day { font-size: 10px; color: var(--tb-text-muted); }
+.tb-mini-bar-col.today .tb-mini-bar { background: var(--tb-primary); }
+
+/* ---------- Modal ---------- */
+.tb-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(20, 27, 53, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: tbFade 180ms ease;
+}
+@keyframes tbFade { from { opacity: 0; } to { opacity: 1; } }
+.tb-modal {
+  background: var(--tb-surface);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  box-shadow: var(--tb-shadow-lg);
+  animation: tbPop 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes tbPop { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: none; } }
+.tb-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.tb-modal-head h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.tb-modal-body { display: flex; flex-direction: column; gap: 14px; }
+.tb-modal-foot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+/* ---------- Analytics ---------- */
+.tb-stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.tb-stat-card {
+  background: var(--tb-bg-tint);
+  border-radius: var(--tb-radius);
+  padding: 18px;
+}
+.tb-stat-card .label { font-size: 12px; color: var(--tb-text-mid); font-weight: 500; }
+.tb-stat-card .val { font-size: 32px; font-weight: 600; margin-top: 6px; line-height: 1; letter-spacing: -0.02em; }
+.tb-stat-card .delta { font-size: 11px; color: var(--tb-accent); margin-top: 4px; }
+
+.tb-chart {
+  display: flex; align-items: flex-end; gap: 8px;
+  height: 220px;
+  padding: 12px 0;
+}
+.tb-chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.tb-chart-bars { width: 100%; display: flex; gap: 3px; align-items: flex-end; justify-content: center; height: 180px; }
+.tb-chart-bar { flex: 0 0 auto; width: 9px; border-radius: 3px 3px 0 0; min-height: 4px; transition: height 400ms ease; }
+.tb-chart-bar.est { background: var(--tb-primary-soft); }
+.tb-chart-bar.act { background: var(--tb-primary); }
+.tb-chart-col .day { font-size: 11px; color: var(--tb-text-mid); }
+.tb-chart-legend { display: flex; gap: 16px; justify-content: center; margin-top: 12px; font-size: 12px; color: var(--tb-text-mid); }
+.tb-chart-legend .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+.tb-table { width: 100%; border-collapse: collapse; }
+.tb-table th { text-align: left; font-size: 11px; color: var(--tb-text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 12px; border-bottom: 1px solid var(--tb-line); font-weight: 500; }
+.tb-table td { padding: 12px; font-size: 13px; border-bottom: 1px solid var(--tb-line); }
+.tb-table tr:last-child td { border-bottom: none; }
+.tb-table .num { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* ---------- Empty state ---------- */
+.tb-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  gap: 18px;
+}
+.tb-empty-icon {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: var(--tb-primary-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tb-primary);
+}
+.tb-empty h2 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.tb-empty p { margin: 0; color: var(--tb-text-mid); max-width: 380px; }
+
+/* ---------- Search bar ---------- */
+.tb-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--tb-bg-tint);
+  border-radius: 12px;
+  padding: 0 12px;
+  height: 40px;
+  flex: 1;
+  max-width: 360px;
+}
+.tb-search input { background: transparent; border: none; flex: 1; font-size: 14px; }
+.tb-search input:focus { outline: none; }
+.tb-search .icon { color: var(--tb-text-muted); }
+
+/* ---------- Hero variant overrides ---------- */
+.variant-hero .tb-app { background: var(--tb-bg); }
+.variant-hero .tb-content { max-width: 1280px; }
+
+.tb-topnav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--tb-line);
+  background: var(--tb-surface);
+  position: sticky; top: 0; z-index: 10;
+}
+.tb-topnav-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; }
+.tb-topnav-nav { display: flex; gap: 4px; background: var(--tb-bg-tint); border-radius: 12px; padding: 4px; }
+.tb-topnav-nav .tb-nav-item { padding: 7px 14px; border-radius: 8px; font-size: 13px; }
+.tb-topnav-nav .tb-nav-item.active { background: var(--tb-surface); color: var(--tb-text); box-shadow: var(--tb-shadow-sm); }
+
+/* ---------- Mobile bottom nav ---------- */
+.tb-bottomnav {
+  display: none;
+  position: fixed; left: 12px; right: 12px; bottom: 12px;
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-line);
+  border-radius: 18px;
+  box-shadow: var(--tb-shadow-lg);
+  padding: 8px;
+  z-index: 50;
+  justify-content: space-around;
+}
+.tb-bottomnav button {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  color: var(--tb-text-muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+.tb-bottomnav button.active { color: var(--tb-primary); background: var(--tb-primary-soft); }
+.tb-bottomnav .icon { width: 20px; height: 20px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  /* Tablet */
+  .tb-sidebar { width: 72px; padding: 18px 10px; }
+  .tb-sidebar-logo span:not(.tb-sidebar-logo-mark) { display: none; }
+  .tb-sidebar-section { display: none; }
+  .tb-sidebar .tb-nav-item span:not(.icon) { display: none; }
+  .tb-sidebar .tb-nav-item { justify-content: center; padding: 12px 0; }
+  .tb-profile { justify-content: center; }
+  .tb-profile-name { display: none; }
+  .tb-content { padding: 20px 22px 60px; }
+  .tb-topbar { padding: 18px 22px; }
+  .tb-donut-wrap.lg { width: 360px; height: 360px; }
+  .tb-donut-wrap.lg .tb-donut-value { font-size: 64px; }
+  .tb-dashboard { grid-template-columns: 1fr; }
+  .tb-week-strip { max-width: none; }
+}
+
+@media (max-width: 767px) {
+  /* Mobile */
+  .tb-sidebar { display: none; }
+  .tb-topnav { display: none; }
+  .tb-topbar[data-screen="dashboard"] .tb-topbar-title { display: none; }
+  .tb-bottomnav { display: flex; }
+  .tb-content { padding: 14px 14px 100px; gap: 16px; }
+  .tb-topbar { padding: 14px 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .tb-topbar h1 { font-size: 18px; }
+  .tb-hero { padding: 24px 16px; border-radius: 18px; }
+  .tb-hero-bold { padding: 32px 16px 24px; }
+  .tb-donut-wrap, .tb-donut-wrap.lg { width: 260px; height: 260px; }
+  .tb-donut-wrap.lg .tb-donut-value { font-size: 46px; }
+  .tb-donut-value { font-size: 42px; }
+  .tb-week { flex-wrap: wrap; }
+  .tb-week-date { min-width: 100px; font-size: 14px; }
+  .tb-week-strip { padding: 4px; gap: 3px; }
+  .tb-week-day .dow { font-size: 10px; }
+  .tb-week-day .dn { font-size: 12px; }
+  .tb-tasks-head { flex-wrap: wrap; gap: 10px; }
+  .tb-tasks-grid { grid-template-columns: 1fr; }
+  .tb-modal { padding: 18px; border-radius: 16px; }
+  .tb-stat-cards { grid-template-columns: 1fr 1fr; }
+  .tb-topnav-nav { display: none; }
+}
+
+/* ---------- Show/hide helpers ---------- */
+.tb-show-mobile { display: none; }
+@media (max-width: 767px) {
+  .tb-show-mobile { display: block; }
+}
+
+/* ---------- Misc utilities ---------- */
+.tb-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; background: var(--tb-bg-tint); font-size: 11px; color: var(--tb-text-mid); font-weight: 500; }
+.tb-divider { height: 1px; background: var(--tb-line); }
+.tb-link { color: var(--tb-primary); cursor: pointer; }
+.tb-link:hover { text-decoration: underline; }
+
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakColor  label="Palette" value={t.palette}
+//                        options={[['#D97757', '#29261b', '#f6f4ef'],
+//                                  ['#475569', '#0f172a', '#f1f5f9']]}
+//                        onChange={(v) => setTweak('palette', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
+    0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
+    // can react — the parent message only reaches the host, not peers.
+    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-omelette-chrome=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">
+          {children}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  // Segments wrap mid-word once per-segment width runs out. The track is
+  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
+  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
+  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
+  // back to a dropdown rather than wrap.
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    // <select> emits strings — map back to the original option value so the
+    // fallback stays type-preserving (numbers, booleans) like the segment path.
+    const resolve = (s) => {
+      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
+      return m === undefined ? s : typeof m === 'object' ? m.value : m;
+    };
+    return <TweakSelect label={label} value={value} options={options}
+                        onChange={(s) => onChange(resolve(s))} />;
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
+// read on both #111 and #fafafa without per-option configuration. Hex input
+// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+// TweakColor — curated color/palette picker. Each option is either a single
+// hex string or an array of 1-5 hex strings; the card adapts — a lone color
+// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
+// rest stacked in a sharp column on the right. onChange emits the
+// option in the shape it was passed (string stays string, array stays array).
+// Without options it falls back to the native color input for back-compat.
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  // Native <input type=color> emits lowercase hex per the HTML spec, so
+  // compare case-insensitively. String() guards JSON.stringify(undefined),
+  // which returns the primitive undefined (no .toLowerCase).
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    aria-label={colors.join(', ')} title={colors.join(' · ')}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>
+                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
+                </span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+
+  </script>
+  <script type="text/babel">
+// Minimal stroke icons - no emoji, no decorative SVGs
+const Icon = ({ name, size = 18, ...props }) => {
+  const paths = {
+    home: <><path d="M3 10.5L12 3l9 7.5" /><path d="M5 9.5V20a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9.5" /></>,
+    list: <><path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><circle cx="4" cy="6" r="1" /><circle cx="4" cy="12" r="1" /><circle cx="4" cy="18" r="1" /></>,
+    chart: <><path d="M3 3v18h18" /><path d="M7 14l4-4 4 3 5-6" /></>,
+    settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" /></>,
+    plus: <><path d="M12 5v14" /><path d="M5 12h14" /></>,
+    close: <><path d="M18 6L6 18" /><path d="M6 6l12 12" /></>,
+    chevronLeft: <path d="M15 18l-6-6 6-6" />,
+    chevronRight: <path d="M9 18l6-6-6-6" />,
+    chevronDown: <path d="M6 9l6 6 6-6" />,
+    check: <path d="M5 12l5 5 9-11" />,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    search: <><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></>,
+    filter: <path d="M3 5h18M6 12h12M10 19h4" />,
+    grid: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
+    rows: <><rect x="3" y="4" width="18" height="5" rx="1" /><rect x="3" y="11" width="18" height="5" rx="1" /><rect x="3" y="18" width="18" height="3" rx="1" /></>,
+    flame: <path d="M12 2s4 4 4 8a4 4 0 11-8 0c0-1.5.5-3 1-3s.5 1 1 1c0-3 2-6 2-6zM7 14c0 3 2 7 5 7s5-4 5-7" />,
+    edit: <><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></>,
+    trash: <><path d="M3 6h18" /><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" /></>,
+    more: <><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></>,
+    user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0116 0" /></>,
+    target: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></>,
+    sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></>,
+    grip: <><circle cx="9" cy="5" r="1.2" fill="currentColor" /><circle cx="15" cy="5" r="1.2" fill="currentColor" /><circle cx="9" cy="12" r="1.2" fill="currentColor" /><circle cx="15" cy="12" r="1.2" fill="currentColor" /><circle cx="9" cy="19" r="1.2" fill="currentColor" /><circle cx="15" cy="19" r="1.2" fill="currentColor" /></>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      {paths[name]}
+    </svg>
+  );
+};
+
+window.Icon = Icon;
+
+  </script>
+  <script type="text/babel">
+// ---------- Sample task data ----------
+const SAMPLE_TASKS = [
+  { id: 't1', name: 'Reading',   color: '#3DCBC9', est: 180, actual: 185, done: false, exceed: 5, weekHrs: 16, freq: 4 },
+  { id: 't2', name: 'Searching', color: '#4A6FE3', est: 120, actual: 0,   done: true,  weekHrs: 8,  freq: 2 },
+  { id: 't3', name: 'Writing',   color: '#F5D165', est: 75,  actual: 0,   done: true,  weekHrs: 5,  freq: 3 },
+  { id: 't4', name: 'Design review', color: '#F3A266', est: 60, actual: 0, done: false, weekHrs: 3, freq: 2 },
+];
+
+const WEEK_DAYS = [
+  { dow: 'Sun', dn: 4, idx: 0 },
+  { dow: 'Mon', dn: 5, idx: 1 },
+  { dow: 'Tue', dn: 6, idx: 2 },
+  { dow: 'Wed', dn: 7, idx: 3 },
+  { dow: 'Thu', dn: 8, idx: 4 },
+  { dow: 'Fri', dn: 9, idx: 5 },
+  { dow: 'Sat', dn: 10, idx: 6 },
+];
+
+const WEEK_BAR_DATA = [
+  { day: 'S', est: 2, act: 1.5 },
+  { day: 'M', est: 3, act: 2.8 },
+  { day: 'T', est: 2.5, act: 3 },
+  { day: 'W', est: 2, act: 2.2 },
+  { day: 'T', est: 1.5, act: 0.8 },
+  { day: 'F', est: 2.5, act: 2.5 },
+  { day: 'S', est: 1, act: 2 },
+];
+
+const DAILY_SPEND = [
+  { date: '2025.10.6 (Sun)', hrs: 1 },
+  { date: '2025.10.9 (Wed)', hrs: 2.5 },
+  { date: '2025.10.10 (Thu)', hrs: 0.5 },
+  { date: '2025.10.12 (Sat)', hrs: 3 },
+  { date: '2025.10.12 (Sat)', hrs: 3.5 },
+];
+
+const TASK_COLORS = ['#4A6FE3', '#3DCBC9', '#F5D165', '#F3A266', '#A78BFA', '#E26B6B'];
+
+// ---------- Helpers ----------
+const formatMins = (mins) => {
+  if (!mins) return '0 mins';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h && m) return `${h} hr ${m} mins`;
+  if (h) return `${h} hr${h > 1 ? 's' : ''}`;
+  return `${m} mins`;
+};
+
+const formatHM = (mins) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+};
+
+Object.assign(window, { SAMPLE_TASKS, WEEK_DAYS, WEEK_BAR_DATA, DAILY_SPEND, TASK_COLORS, formatMins, formatHM });
+
+  </script>
+  <script type="text/babel">
+// ============ Donut ============
+const Donut = ({ tasks, budgetMins, size = 'md', showRemaining = true }) => {
+  const W = 320;
+  const cx = W / 2, cy = W / 2;
+  const R = 130;
+  const SW = 26;
+  const C = 2 * Math.PI * R;
+
+  const usedMins = tasks.filter(t => !t.done).reduce((s, t) => s + (t.est || 0), 0);
+  const completedMins = tasks.filter(t => t.done).reduce((s, t) => s + (t.actual || t.est || 0), 0);
+  const totalPlanned = tasks.reduce((s, t) => s + (t.est || 0), 0);
+
+  const remaining = Math.max(0, budgetMins - completedMins - usedMins);
+  const remainingHrs = Math.floor(remaining / 60);
+  const remainingMins = remaining % 60;
+
+  // Segments
+  let offset = 0;
+  const segs = [];
+  tasks.forEach(t => {
+    const portion = (t.est || 0) / budgetMins;
+    const dash = portion * C;
+    segs.push({ ...t, dash, offset, completed: t.done });
+    offset += dash;
+  });
+
+  const isEmpty = tasks.length === 0;
+
+  return (
+    <div className={`tb-donut-wrap ${size === 'lg' ? 'lg' : size === 'sm' ? 'sm' : ''}`}>
+      <svg viewBox={`0 0 ${W} ${W}`}>
+        {/* Track */}
+        <circle cx={cx} cy={cy} r={R}
+          className="tb-donut-track"
+          strokeWidth={SW}
+          fill="none"
+        />
+        {/* Subtle inner ring */}
+        <circle cx={cx} cy={cy} r={R - SW - 2}
+          stroke="rgba(74,111,227,0.06)"
+          strokeWidth="1"
+          fill="none"
+        />
+        {/* Segments */}
+        {!isEmpty && segs.map((s, i) => (
+          <circle
+            key={s.id}
+            cx={cx} cy={cy} r={R}
+            className="tb-donut-seg"
+            stroke={s.color}
+            strokeWidth={SW}
+            fill="none"
+            strokeLinecap="butt"
+            strokeDasharray={`${s.dash} ${C}`}
+            strokeDashoffset={-s.offset}
+            opacity={s.completed ? 0.45 : 1}
+          />
+        ))}
+      </svg>
+      <div className="tb-donut-center">
+        {showRemaining ? (
+          <>
+            <div className="tb-donut-label">Remaining</div>
+            <div className="tb-donut-value">
+              {String(remainingHrs).padStart(2, '0')}:{String(remainingMins).padStart(2, '0')}
+            </div>
+            <div className="tb-donut-sub">Daily total: <strong>{Math.floor(budgetMins/60)} hrs</strong></div>
+          </>
+        ) : (
+          <>
+            <div className="tb-donut-label">Time budget</div>
+            <div className="tb-donut-value">{Math.floor(budgetMins/60)} hrs</div>
+            <div className="tb-donut-sub">9:00 — 17:00</div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ============ Week strip ============
+const WeekStrip = ({ activeIdx, onPick, date, onPrev, onNext }) => (
+  <div className="tb-week">
+    {date && (
+      <div className="tb-week-header">
+        <button className="tb-week-arrow" onClick={onPrev} aria-label="Previous"><Icon name="chevronLeft" size={16} /></button>
+        <div className="tb-week-date">{date}</div>
+        <button className="tb-week-arrow" onClick={onNext} aria-label="Next"><Icon name="chevronRight" size={16} /></button>
+      </div>
+    )}
+    <div className="tb-week-strip">
+      {WEEK_DAYS.map((d) => (
+        <button key={d.idx} className={`tb-week-day ${d.idx === activeIdx ? 'active' : ''}`} onClick={() => onPick(d.idx)}>
+          <span className="dow">{d.dow}</span>
+          <span className="dn">{d.dn}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+// ============ Task row / card ============
+const TaskRow = ({ task, onToggle, onEdit, onDelete, dragHandlers }) => (
+  <div
+    className={`tb-task ${task.done ? 'done' : ''} ${dragHandlers?.dragging ? 'dragging' : ''} ${dragHandlers?.over ? 'over' : ''}`}
+    draggable={!!dragHandlers}
+    onDragStart={dragHandlers?.onDragStart}
+    onDragOver={dragHandlers?.onDragOver}
+    onDragLeave={dragHandlers?.onDragLeave}
+    onDrop={dragHandlers?.onDrop}
+    onDragEnd={dragHandlers?.onDragEnd}
+  >
+    {dragHandlers && (
+      <span className="tb-drag-handle" aria-hidden="true">
+        <Icon name="grip" size={14} />
+      </span>
+    )}
+    <button
+      className={`tb-check ${task.done ? 'checked' : ''}`}
+      onClick={() => onToggle(task.id)}
+      aria-label="toggle"
+    >
+      {task.done && <Icon name="check" size={14} />}
+    </button>
+    <div className="tb-task-swatch" style={{ background: task.color }}></div>
+    <div className="tb-task-body">
+      <div className="tb-task-name">{task.name}</div>
+      <div className="tb-task-meta">
+        <Icon name="clock" size={12} />
+        <span>Estimation {formatMins(task.est)}</span>
+      </div>
+      {task.exceed > 0 && !task.done && (
+        <div className="tb-task-exceed">
+          <Icon name="flame" size={11} /> Exceed {task.exceed} mins
+        </div>
+      )}
+    </div>
+    <button className="tb-btn-icon" onClick={() => onEdit(task)} aria-label="edit"><Icon name="edit" size={16} /></button>
+  </div>
+);
+
+const TaskCard = ({ task, onToggle, onEdit, dragHandlers }) => (
+  <div
+    className={`tb-task-card ${task.done ? 'done' : ''} ${dragHandlers?.dragging ? 'dragging' : ''} ${dragHandlers?.over ? 'over' : ''}`}
+    draggable={!!dragHandlers}
+    onDragStart={dragHandlers?.onDragStart}
+    onDragOver={dragHandlers?.onDragOver}
+    onDragLeave={dragHandlers?.onDragLeave}
+    onDrop={dragHandlers?.onDrop}
+    onDragEnd={dragHandlers?.onDragEnd}
+  >
+    <div className="tb-task-swatch" style={{ background: task.color }}></div>
+    <div className="tb-row" style={{ justifyContent: 'space-between' }}>
+      <div className="tb-row tb-gap-2" style={{ minWidth: 0 }}>
+        {dragHandlers && (
+          <span className="tb-drag-handle" aria-hidden="true">
+            <Icon name="grip" size={14} />
+          </span>
+        )}
+        <div className="tb-task-name">{task.name}</div>
+      </div>
+      <button
+        className={`tb-check ${task.done ? 'checked' : ''}`}
+        onClick={() => onToggle(task.id)}
+      >{task.done && <Icon name="check" size={14} />}</button>
+    </div>
+    <div className="tb-task-meta">
+      <Icon name="clock" size={12} />
+      <span>{formatMins(task.est)}</span>
+    </div>
+    {task.exceed > 0 && !task.done && (
+      <div className="tb-task-exceed" style={{ alignSelf: 'flex-start' }}>
+        <Icon name="flame" size={11} /> Exceed {task.exceed} mins
+      </div>
+    )}
+    <div className="tb-row" style={{ justifyContent: 'flex-end', marginTop: 'auto', paddingTop: 6 }}>
+      <button className="tb-btn-icon" onClick={() => onEdit(task)}><Icon name="edit" size={16} /></button>
+    </div>
+  </div>
+);
+
+// ============ Timeline (draggable blocks) ============
+const Timeline = ({ tasks, startHr = 9, endHr = 17, onDrag }) => {
+  const totalHrs = endHr - startHr;
+  const totalMins = totalHrs * 60;
+  const [drag, setDrag] = React.useState(null);
+  const ref = React.useRef(null);
+
+  // place each task starting from 9:00 sequentially
+  const blocks = React.useMemo(() => {
+    let cur = 0;
+    return tasks.filter(t => !t.done).map(t => {
+      const start = t.startOffset !== undefined ? t.startOffset : cur;
+      const block = { ...t, start, dur: t.est };
+      cur = start + t.est;
+      return block;
+    });
+  }, [tasks]);
+
+  const onMouseDown = (e, b) => {
+    e.preventDefault();
+    const rect = ref.current.getBoundingClientRect();
+    const startX = e.clientX;
+    const initialOffset = b.start;
+
+    setDrag({ id: b.id, x: 0 });
+
+    const move = (ev) => {
+      const dx = ev.clientX - startX;
+      const minsPerPx = totalMins / rect.width;
+      let newStart = Math.round((initialOffset + dx * minsPerPx) / 15) * 15;
+      newStart = Math.max(0, Math.min(totalMins - b.dur, newStart));
+      onDrag(b.id, newStart);
+    };
+    const up = () => {
+      setDrag(null);
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  return (
+    <div className="tb-timeline">
+      <div className="tb-timeline-head">
+        <h4>Today's plan</h4>
+        <span className="tb-pill">{startHr}:00 — {endHr}:00 · Drag to reschedule</span>
+      </div>
+      <div className="tb-timeline-bar" ref={ref}>
+        <div className="tb-timeline-hours">
+          {Array.from({ length: totalHrs }, (_, i) => (
+            <div className="tb-timeline-hour" key={i}>
+              <span>{String(startHr + i).padStart(2, '0')}:00</span>
+            </div>
+          ))}
+        </div>
+        {blocks.map((b) => {
+          const leftPct = (b.start / totalMins) * 100;
+          const widthPct = (b.dur / totalMins) * 100;
+          return (
+            <div
+              key={b.id}
+              className={`tb-timeline-block ${drag?.id === b.id ? 'dragging' : ''}`}
+              style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: b.color }}
+              onMouseDown={(e) => onMouseDown(e, b)}
+            >
+              <div className="tb-tb-title">{b.name}</div>
+              <div className="tb-tb-time">{formatHM(startHr * 60 + b.start)} — {formatHM(startHr * 60 + b.start + b.dur)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ============ Modals ============
+const SetTimeModal = ({ open, onClose, onSave, initial }) => {
+  const [start, setStart] = React.useState(initial?.start || '09:00');
+  const [end, setEnd] = React.useState(initial?.end || '17:00');
+  if (!open) return null;
+  return (
+    <div className="tb-modal-backdrop" onClick={onClose}>
+      <div className="tb-modal" onClick={e => e.stopPropagation()}>
+        <div className="tb-modal-head">
+          <h3>Set available time</h3>
+          <button className="tb-btn-icon" onClick={onClose}><Icon name="close" size={18} /></button>
+        </div>
+        <div className="tb-modal-body">
+          <div className="tb-field">
+            <label className="tb-field-label">Start time</label>
+            <div className="tb-row tb-gap-2" style={{ background: 'var(--tb-bg-tint)', borderRadius: 12, padding: '0 14px', height: 44 }}>
+              <Icon name="clock" size={16} />
+              <input type="time" value={start} onChange={e => setStart(e.target.value)} style={{ background: 'transparent', border: 'none', flex: 1, fontSize: 14 }} />
+            </div>
+          </div>
+          <div className="tb-field">
+            <label className="tb-field-label">End time</label>
+            <div className="tb-row tb-gap-2" style={{ background: 'var(--tb-bg-tint)', borderRadius: 12, padding: '0 14px', height: 44 }}>
+              <Icon name="clock" size={16} />
+              <input type="time" value={end} onChange={e => setEnd(e.target.value)} style={{ background: 'transparent', border: 'none', flex: 1, fontSize: 14 }} />
+            </div>
+          </div>
+        </div>
+        <div className="tb-modal-foot">
+          <button className="tb-btn tb-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="tb-btn tb-btn-primary" onClick={() => onSave(start, end)}>Save</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EditTaskModal = ({ open, onClose, onSave, onDelete, task }) => {
+  const [name, setName] = React.useState(task?.name || '');
+  const [color, setColor] = React.useState(task?.color || TASK_COLORS[0]);
+  const [est, setEst] = React.useState(task?.est || 60);
+  const [actual, setActual] = React.useState(task?.actual || 0);
+
+  React.useEffect(() => {
+    if (task) {
+      setName(task.name || '');
+      setColor(task.color || TASK_COLORS[0]);
+      setEst(task.est || 60);
+      setActual(task.actual || 0);
+    } else {
+      setName(''); setColor(TASK_COLORS[0]); setEst(60); setActual(0);
+    }
+  }, [task, open]);
+
+  if (!open) return null;
+  const isEdit = !!task?.id;
+  return (
+    <div className="tb-modal-backdrop" onClick={onClose}>
+      <div className="tb-modal" onClick={e => e.stopPropagation()}>
+        <div className="tb-modal-head">
+          <h3>{isEdit ? 'Edit Task' : 'Add Task'}</h3>
+          <button className="tb-btn-icon" onClick={onClose}><Icon name="close" size={18} /></button>
+        </div>
+        <div className="tb-modal-body">
+          <div className="tb-field">
+            <label className="tb-field-label">Activity name</label>
+            <div className="tb-row tb-gap-2">
+              <input className="tb-input" placeholder="e.g. Reading" value={name} onChange={e => setName(e.target.value)} />
+              <ColorPicker value={color} onChange={setColor} />
+            </div>
+          </div>
+          <div className="tb-field">
+            <label className="tb-field-label">Estimation (minutes)</label>
+            <div className="tb-row tb-gap-2" style={{ background: 'var(--tb-bg-tint)', borderRadius: 12, padding: '0 14px', height: 44 }}>
+              <Icon name="clock" size={16} />
+              <input type="number" min="0" step="15" value={est} onChange={e => setEst(Number(e.target.value))} style={{ background: 'transparent', border: 'none', flex: 1, fontSize: 14 }} />
+              <span style={{ color: 'var(--tb-text-muted)', fontSize: 12 }}>{formatMins(est)}</span>
+            </div>
+          </div>
+          <div className="tb-field">
+            <label className="tb-field-label">Actual (minutes)</label>
+            <div className="tb-row tb-gap-2" style={{ background: 'var(--tb-bg-tint)', borderRadius: 12, padding: '0 14px', height: 44 }}>
+              <Icon name="clock" size={16} />
+              <input type="number" min="0" step="5" value={actual} onChange={e => setActual(Number(e.target.value))} style={{ background: 'transparent', border: 'none', flex: 1, fontSize: 14 }} />
+              <span style={{ color: 'var(--tb-text-muted)', fontSize: 12 }}>{actual ? formatMins(actual) : '—'}</span>
+            </div>
+          </div>
+        </div>
+        <div className="tb-modal-foot" style={{ justifyContent: isEdit ? 'space-between' : 'flex-end' }}>
+          {isEdit && <button className="tb-btn tb-btn-danger-ghost" onClick={() => onDelete(task.id)}>Delete</button>}
+          <div className="tb-row tb-gap-2">
+            <button className="tb-btn tb-btn-ghost" onClick={onClose}>Cancel</button>
+            <button className="tb-btn tb-btn-primary" onClick={() => onSave({ id: task?.id, name, color, est, actual })}>Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ColorPicker = ({ value, onChange }) => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          width: 44, height: 44, borderRadius: 12, background: value,
+          border: '2px solid white', boxShadow: '0 0 0 1px var(--tb-line-strong)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+        }}
+      >
+        <Icon name="check" size={14} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 10,
+          background: 'white', borderRadius: 12, padding: 8, boxShadow: 'var(--tb-shadow-lg)',
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, border: '1px solid var(--tb-line)'
+        }}>
+          {TASK_COLORS.map(c => (
+            <button
+              key={c}
+              onClick={() => { onChange(c); setOpen(false); }}
+              style={{
+                width: 28, height: 28, borderRadius: 8, background: c,
+                border: c === value ? '2px solid var(--tb-text)' : '2px solid transparent',
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+Object.assign(window, { Donut, WeekStrip, TaskRow, TaskCard, Timeline, SetTimeModal, EditTaskModal });
+
+// ============ Sortable hook (drag to reorder) ============
+function useSortable(items, onReorder) {
+  const [draggingId, setDraggingId] = React.useState(null);
+  const [overId, setOverId] = React.useState(null);
+
+  return (id) => ({
+    dragging: draggingId === id,
+    over: overId === id && draggingId !== id,
+    onDragStart: (e) => {
+      setDraggingId(id);
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', id); } catch (err) {}
+    },
+    onDragOver: (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (overId !== id) setOverId(id);
+    },
+    onDragLeave: () => {
+      if (overId === id) setOverId(null);
+    },
+    onDrop: (e) => {
+      e.preventDefault();
+      if (draggingId && draggingId !== id) {
+        const from = items.findIndex(t => t.id === draggingId);
+        const to = items.findIndex(t => t.id === id);
+        if (from > -1 && to > -1) {
+          const next = [...items];
+          const [moved] = next.splice(from, 1);
+          next.splice(to, 0, moved);
+          onReorder(next);
+        }
+      }
+      setDraggingId(null);
+      setOverId(null);
+    },
+    onDragEnd: () => {
+      setDraggingId(null);
+      setOverId(null);
+    },
+  });
+}
+
+window.useSortable = useSortable;
+
+  </script>
+  <script type="text/babel">
+// ============ Dashboard - Calm variant ============
+const DashboardCalm = ({ state, dispatch }) => {
+  const { tasks, budgetMins, selectedDay, viewMode } = state;
+  const completed = tasks.filter(t => t.done).length;
+  const totalUsed = tasks.reduce((s, t) => s + (t.est || 0), 0);
+  const sortable = useSortable(tasks, (next) => dispatch({ type: 'REORDER_TASKS', tasks: next }));
+
+  return (
+    <>
+      <div className="tb-show-mobile">
+        <WeekStrip
+          date="8 June, 2025"
+          activeIdx={selectedDay}
+          onPick={(i) => dispatch({ type: 'SET_DAY', i })}
+          onPrev={() => dispatch({ type: 'PREV_WEEK' })}
+          onNext={() => dispatch({ type: 'NEXT_WEEK' })}
+        />
+      </div>
+
+      <div className="tb-dashboard">
+        <div className="tb-col tb-gap-6">
+          <div className="tb-hero">
+            <h2>Time budget</h2>
+            <Donut tasks={tasks} budgetMins={budgetMins} />
+            <div className="tb-row tb-gap-3" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button className="tb-btn tb-btn-ghost" onClick={() => dispatch({ type: 'OPEN_TIME' })}>
+                <Icon name="clock" size={16} /> Adjust budget
+              </button>
+              <button className="tb-btn tb-btn-primary" onClick={() => dispatch({ type: 'OPEN_TASK', task: null })}>
+                <Icon name="plus" size={16} /> Add task
+              </button>
+            </div>
+          </div>
+
+          <div className="tb-card" style={{ padding: 20 }}>
+            <div className="tb-tasks-head">
+              <h3>Tasks ({tasks.length})</h3>
+              <div className="tb-row tb-gap-3">
+                <div className="tb-view-toggle">
+                  <button className={viewMode === 'list' ? 'active' : ''} onClick={() => dispatch({ type: 'SET_VIEW', mode: 'list' })}>
+                    <Icon name="rows" size={14} />
+                  </button>
+                  <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => dispatch({ type: 'SET_VIEW', mode: 'grid' })}>
+                    <Icon name="grid" size={14} />
+                  </button>
+                </div>
+                <button className="tb-btn tb-btn-sm tb-btn-ghost" onClick={() => dispatch({ type: 'OPEN_TASK', task: null })}>
+                  <Icon name="plus" size={14} /> Add
+                </button>
+              </div>
+            </div>
+            {viewMode === 'list' ? (
+              <div className="tb-tasks-list">
+                {tasks.map(t => (
+                  <TaskRow
+                    key={t.id} task={t}
+                    dragHandlers={sortable(t.id)}
+                    onToggle={(id) => dispatch({ type: 'TOGGLE_TASK', id })}
+                    onEdit={(task) => dispatch({ type: 'OPEN_TASK', task })}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="tb-tasks-grid">
+                {tasks.map(t => (
+                  <TaskCard
+                    key={t.id} task={t}
+                    dragHandlers={sortable(t.id)}
+                    onToggle={(id) => dispatch({ type: 'TOGGLE_TASK', id })}
+                    onEdit={(task) => dispatch({ type: 'OPEN_TASK', task })}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <Timeline
+            tasks={tasks.map(t => ({ ...t, startOffset: state.starts[t.id] }))}
+            startHr={9} endHr={17}
+            onDrag={(id, mins) => dispatch({ type: 'SET_START', id, mins })}
+          />
+        </div>
+
+        <div className="tb-rail">
+          <div className="tb-rail-card">
+            <h4>Today at a glance</h4>
+            <div className="tb-stat-row"><span className="label">Daily budget</span><span className="val">{Math.floor(budgetMins/60)} hrs</span></div>
+            <div className="tb-stat-row"><span className="label">Planned</span><span className="val">{formatMins(totalUsed)}</span></div>
+            <div className="tb-stat-row"><span className="label">Completed</span><span className="val">{completed} / {tasks.length}</span></div>
+            <div className="tb-stat-row"><span className="label">Streak</span><span className="val">12 days</span></div>
+          </div>
+          <div className="tb-rail-card">
+            <h4>This week</h4>
+            <div className="tb-mini-bars">
+              {WEEK_BAR_DATA.map((d, i) => (
+                <div key={i} className={`tb-mini-bar-col ${i === selectedDay ? 'today' : ''}`}>
+                  <div className="tb-mini-bar" style={{ height: `${d.act * 18}px` }}></div>
+                  <div className="day">{d.day}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--tb-text-mid)', marginTop: 6 }}>Weekly total: <strong style={{ color: 'var(--tb-text)' }}>15 hrs</strong></div>
+          </div>
+          <div className="tb-rail-card">
+            <h4>Top activities</h4>
+            <div className="tb-col tb-gap-2">
+              {tasks.slice(0, 4).map(t => (
+                <div key={t.id} className="tb-row tb-gap-3" style={{ padding: '4px 0' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: 3, background: t.color }}></div>
+                  <span style={{ flex: 1, fontSize: 13 }}>{t.name}</span>
+                  <span style={{ fontSize: 12, color: 'var(--tb-text-muted)', fontVariantNumeric: 'tabular-nums' }}>{t.weekHrs}h</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// ============ Dashboard - Hero variant ============
+const DashboardHero = ({ state, dispatch }) => {
+  const { tasks, budgetMins, selectedDay, viewMode } = state;
+  const sortable = useSortable(tasks, (next) => dispatch({ type: 'REORDER_TASKS', tasks: next }));
+
+  return (
+    <>
+      <div className="tb-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <div style={{ fontSize: 13, color: 'var(--tb-text-muted)', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Wednesday</div>
+          <h1 style={{ margin: '4px 0 0', fontSize: 32, fontWeight: 600, letterSpacing: '-0.02em' }}>8 June, 2025</h1>
+        </div>
+        <WeekStrip
+          date=""
+          activeIdx={selectedDay}
+          onPick={(i) => dispatch({ type: 'SET_DAY', i })}
+          onPrev={() => dispatch({ type: 'PREV_WEEK' })}
+          onNext={() => dispatch({ type: 'NEXT_WEEK' })}
+        />
+      </div>
+
+      <div className="tb-hero tb-hero-bold">
+        <Donut tasks={tasks} budgetMins={budgetMins} size="lg" />
+        <div className="tb-hero-cta">
+          <button className="tb-btn tb-btn-ghost" onClick={() => dispatch({ type: 'OPEN_TIME' })}>
+            <Icon name="clock" size={16} /> Adjust budget · 9:00–17:00
+          </button>
+          <button className="tb-btn tb-btn-primary tb-btn-lg" onClick={() => dispatch({ type: 'OPEN_TASK', task: null })}>
+            <Icon name="plus" size={18} /> Add task
+          </button>
+        </div>
+      </div>
+
+      <div className="tb-card" style={{ padding: 24 }}>
+        <div className="tb-tasks-head">
+          <h3>Today's tasks</h3>
+          <div className="tb-row tb-gap-3">
+            <div className="tb-view-toggle">
+              <button className={viewMode === 'list' ? 'active' : ''} onClick={() => dispatch({ type: 'SET_VIEW', mode: 'list' })}>
+                <Icon name="rows" size={14} />
+              </button>
+              <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => dispatch({ type: 'SET_VIEW', mode: 'grid' })}>
+                <Icon name="grid" size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+        {viewMode === 'grid' ? (
+          <div className="tb-tasks-grid">
+            {tasks.map(t => (
+              <TaskCard
+                key={t.id} task={t}
+                dragHandlers={sortable(t.id)}
+                onToggle={(id) => dispatch({ type: 'TOGGLE_TASK', id })}
+                onEdit={(task) => dispatch({ type: 'OPEN_TASK', task })}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="tb-tasks-list">
+            {tasks.map(t => (
+              <TaskRow
+                key={t.id} task={t}
+                dragHandlers={sortable(t.id)}
+                onToggle={(id) => dispatch({ type: 'TOGGLE_TASK', id })}
+                onEdit={(task) => dispatch({ type: 'OPEN_TASK', task })}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Timeline
+        tasks={tasks.map(t => ({ ...t, startOffset: state.starts[t.id] }))}
+        startHr={9} endHr={17}
+        onDrag={(id, mins) => dispatch({ type: 'SET_START', id, mins })}
+      />
+    </>
+  );
+};
+
+// ============ Empty state ============
+const EmptyState = ({ onSetTime }) => (
+  <>
+    <WeekStrip date="8 June, 2025" activeIdx={3} onPick={() => {}} onPrev={() => {}} onNext={() => {}} />
+    <div className="tb-empty">
+      <div className="tb-empty-icon">
+        <Icon name="target" size={36} />
+      </div>
+      <h2>Start by setting your available time</h2>
+      <p>Plan your day around the hours you actually have. Set a window, and we'll help you fit only what fits.</p>
+      <button className="tb-btn tb-btn-primary tb-btn-lg" onClick={onSetTime}>
+        <Icon name="clock" size={16} /> Set available time
+      </button>
+    </div>
+  </>
+);
+
+// ============ Task overview ============
+const TaskOverview = ({ state, dispatch }) => {
+  const [query, setQuery] = React.useState('');
+  const [sort, setSort] = React.useState('Newest');
+  const filtered = state.tasks.filter(t => t.name.toLowerCase().includes(query.toLowerCase()));
+
+  return (
+    <>
+      <div className="tb-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div className="tb-row tb-gap-3" style={{ flex: 1, flexWrap: 'wrap' }}>
+          <div className="tb-search">
+            <Icon name="search" size={16} className="icon" />
+            <input placeholder="Search task" value={query} onChange={e => setQuery(e.target.value)} />
+          </div>
+          <select className="tb-input" style={{ width: 'auto', minWidth: 140 }} value={sort} onChange={e => setSort(e.target.value)}>
+            <option>Newest</option>
+            <option>Oldest</option>
+            <option>Recently Used</option>
+            <option>Most time spent</option>
+          </select>
+        </div>
+        <button className="tb-btn tb-btn-primary" onClick={() => dispatch({ type: 'OPEN_TASK', task: null })}>
+          <Icon name="plus" size={16} /> New task
+        </button>
+      </div>
+
+      <div className="tb-card" style={{ padding: 0 }}>
+        <table className="tb-table">
+          <thead>
+            <tr>
+              <th style={{ width: 32 }}></th>
+              <th>Activity</th>
+              <th>This week</th>
+              <th>Frequency</th>
+              <th>Best streak</th>
+              <th style={{ width: 80 }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(t => (
+              <tr key={t.id}>
+                <td><div style={{ width: 12, height: 12, borderRadius: 3, background: t.color }}></div></td>
+                <td><strong>{t.name}</strong></td>
+                <td className="num">{t.weekHrs} hrs</td>
+                <td>{t.freq} times this week</td>
+                <td className="num">12 days</td>
+                <td>
+                  <div className="tb-row tb-gap-2">
+                    <button className="tb-btn-icon" onClick={() => dispatch({ type: 'GO_ANALYTICS', taskId: t.id })}><Icon name="chart" size={16} /></button>
+                    <button className="tb-btn-icon" onClick={() => dispatch({ type: 'OPEN_TASK', task: t })}><Icon name="edit" size={16} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {!filtered.length && (
+              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 48, color: 'var(--tb-text-muted)' }}>No tasks match "{query}"</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+};
+
+// ============ Analytics ============
+const Analytics = ({ state, dispatch }) => {
+  const task = state.tasks.find(t => t.id === state.analyticsTaskId) || state.tasks[0];
+  const maxVal = Math.max(...WEEK_BAR_DATA.map(d => Math.max(d.est, d.act)));
+
+  return (
+    <>
+      <div className="tb-row tb-gap-3" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div className="tb-row tb-gap-3">
+          <button className="tb-btn-icon" onClick={() => dispatch({ type: 'GO', screen: 'overview' })}><Icon name="chevronLeft" size={18} /></button>
+          <div>
+            <div style={{ fontSize: 12, color: 'var(--tb-text-muted)' }}>Analytics</div>
+            <h2 style={{ margin: '2px 0 0', fontSize: 22, fontWeight: 600 }}>
+              <span style={{ display: 'inline-block', width: 12, height: 12, borderRadius: 3, background: task.color, marginRight: 10, verticalAlign: 'middle' }}></span>
+              {task.name}
+            </h2>
+          </div>
+        </div>
+        <div className="tb-row tb-gap-2">
+          <select className="tb-input" style={{ width: 'auto' }} defaultValue="weekly">
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="all">All-time</option>
+          </select>
+          {state.tasks.length > 1 && (
+            <select className="tb-input" style={{ width: 'auto' }} value={task.id} onChange={e => dispatch({ type: 'GO_ANALYTICS', taskId: e.target.value })}>
+              {state.tasks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          )}
+        </div>
+      </div>
+
+      <div className="tb-stat-cards">
+        <div className="tb-stat-card"><div className="label">Total spend</div><div className="val">35<span style={{ fontSize: 18, color: 'var(--tb-text-muted)', marginLeft: 4 }}>hrs</span></div><div className="delta">+4 hrs vs last week</div></div>
+        <div className="tb-stat-card"><div className="label">Best streak</div><div className="val">12<span style={{ fontSize: 18, color: 'var(--tb-text-muted)', marginLeft: 4 }}>days</span></div><div className="delta">Personal best</div></div>
+        <div className="tb-stat-card"><div className="label">Avg session</div><div className="val">52<span style={{ fontSize: 18, color: 'var(--tb-text-muted)', marginLeft: 4 }}>min</span></div><div className="delta">−8 min vs last week</div></div>
+        <div className="tb-stat-card"><div className="label">Accuracy</div><div className="val">93<span style={{ fontSize: 18, color: 'var(--tb-text-muted)', marginLeft: 4 }}>%</span></div><div className="delta">Estimation vs actual</div></div>
+      </div>
+
+      <div className="tb-card" style={{ padding: 24 }}>
+        <div className="tb-row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
+          <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Time tracking</h4>
+          <div className="tb-row tb-gap-2">
+            <button className="tb-btn-icon"><Icon name="chevronLeft" size={16} /></button>
+            <span style={{ fontSize: 13, color: 'var(--tb-text-mid)' }}>2025 Oct 6 — Oct 12</span>
+            <button className="tb-btn-icon"><Icon name="chevronRight" size={16} /></button>
+          </div>
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--tb-text-muted)', marginBottom: 12 }}>Weekly Total: <strong style={{ color: 'var(--tb-text)' }}>15 hrs</strong></div>
+        <div className="tb-chart">
+          {WEEK_BAR_DATA.map((d, i) => (
+            <div key={i} className="tb-chart-col">
+              <div className="tb-chart-bars">
+                <div className="tb-chart-bar est" style={{ height: `${(d.est / maxVal) * 100}%` }} title={`Estimated ${d.est}h`}></div>
+                <div className="tb-chart-bar act" style={{ height: `${(d.act / maxVal) * 100}%`, background: task.color }} title={`Actual ${d.act}h`}></div>
+              </div>
+              <div className="day">{d.day}</div>
+            </div>
+          ))}
+        </div>
+        <div className="tb-chart-legend">
+          <span><span className="dot" style={{ background: 'var(--tb-primary-soft)' }}></span> Estimated</span>
+          <span><span className="dot" style={{ background: task.color }}></span> Actual</span>
+        </div>
+      </div>
+
+      <div className="tb-card" style={{ padding: 0 }}>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--tb-line)', fontWeight: 600 }}>Daily spend</div>
+        <table className="tb-table">
+          <tbody>
+            {DAILY_SPEND.map((d, i) => (
+              <tr key={i}>
+                <td>{d.date}</td>
+                <td className="num" style={{ textAlign: 'right' }}>{d.hrs} hr</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+};
+
+// ============ Settings ============
+const Settings = ({ state, dispatch }) => {
+  return (
+    <>
+      <div className="tb-row tb-gap-3">
+        <div className="tb-avatar" style={{ width: 56, height: 56, fontSize: 20 }}>AC</div>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600 }}>Alex Chen</h2>
+          <div style={{ color: 'var(--tb-text-muted)', fontSize: 13 }}>alex@timebudget.app · Joined June 2025</div>
+        </div>
+      </div>
+
+      <div className="tb-card" style={{ padding: 24 }}>
+        <h4 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600 }}>Defaults</h4>
+        <div className="tb-col tb-gap-4">
+          <SettingRow label="Default work window" sub="Used when you don't set one for the day" right={
+            <button className="tb-btn tb-btn-sm tb-btn-ghost" onClick={() => dispatch({ type: 'OPEN_TIME' })}>9:00 — 17:00</button>
+          } />
+          <SettingRow label="Week starts on" right={
+            <select className="tb-input" style={{ width: 'auto', height: 36 }} defaultValue="Sunday">
+              <option>Sunday</option><option>Monday</option>
+            </select>
+          } />
+          <SettingRow label="Time unit" right={
+            <div className="tb-view-toggle">
+              <button className="active">Minutes</button>
+              <button>Hours</button>
+            </div>
+          } />
+        </div>
+      </div>
+
+      <div className="tb-card" style={{ padding: 24 }}>
+        <h4 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600 }}>Notifications</h4>
+        <div className="tb-col tb-gap-4">
+          <SettingRow label="Daily planning reminder" sub="Every morning at 8:30" right={<Toggle on />} />
+          <SettingRow label="Exceed time warning" sub="When a task runs over estimation" right={<Toggle on />} />
+          <SettingRow label="Weekly review" sub="Sunday evenings" right={<Toggle />} />
+        </div>
+      </div>
+
+      <div className="tb-card" style={{ padding: 24 }}>
+        <h4 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600 }}>Data</h4>
+        <div className="tb-row tb-gap-3" style={{ flexWrap: 'wrap' }}>
+          <button className="tb-btn tb-btn-ghost">Export CSV</button>
+          <button className="tb-btn tb-btn-ghost">Sync with calendar</button>
+          <button className="tb-btn tb-btn-danger-ghost">Clear all data</button>
+        </div>
+      </div>
+    </>
+  );
+};
+
+const SettingRow = ({ label, sub, right }) => (
+  <div className="tb-row" style={{ justifyContent: 'space-between', gap: 16, padding: '4px 0' }}>
+    <div>
+      <div style={{ fontSize: 14, fontWeight: 500 }}>{label}</div>
+      {sub && <div style={{ fontSize: 12, color: 'var(--tb-text-muted)', marginTop: 2 }}>{sub}</div>}
+    </div>
+    <div>{right}</div>
+  </div>
+);
+
+const Toggle = ({ on: initial = false, onChange }) => {
+  const [on, setOn] = React.useState(initial);
+  return (
+    <button
+      onClick={() => { setOn(!on); onChange?.(!on); }}
+      style={{
+        width: 40, height: 22, borderRadius: 999,
+        background: on ? 'var(--tb-primary)' : 'var(--tb-line-strong)',
+        position: 'relative', transition: 'background 150ms ease',
+      }}
+    >
+      <span style={{
+        position: 'absolute', top: 2, left: on ? 20 : 2, width: 18, height: 18, borderRadius: '50%',
+        background: 'white', boxShadow: '0 1px 2px rgba(0,0,0,0.15)', transition: 'left 150ms ease',
+      }} />
+    </button>
+  );
+};
+
+Object.assign(window, { DashboardCalm, DashboardHero, EmptyState, TaskOverview, Analytics, Settings });
+
+  </script>
+  <script type="text/babel">
+// ============ Layout chrome ============
+const NAV_ITEMS = [
+{ id: 'dashboard', label: 'Dashboard', icon: 'home' },
+{ id: 'overview', label: 'Tasks', icon: 'list' },
+{ id: 'analytics', label: 'Analytics', icon: 'chart' },
+{ id: 'settings', label: 'Settings', icon: 'settings' }];
+
+
+const Sidebar = ({ screen, go }) =>
+<aside className="tb-sidebar">
+    <div className="tb-sidebar-logo">
+      <span className="tb-sidebar-logo-mark">T</span>
+      <span>Timebudget</span>
+    </div>
+    <nav className="tb-sidebar-nav">
+      <div className="tb-sidebar-section">Plan</div>
+      {NAV_ITEMS.map((it) =>
+    <button key={it.id} className={`tb-nav-item ${screen === it.id ? 'active' : ''}`} onClick={() => go(it.id)}>
+          <span className="icon"><Icon name={it.icon} size={18} /></span>
+          <span>{it.label}</span>
+        </button>
+    )}
+    </nav>
+    <div className="tb-sidebar-foot">
+      <div className="tb-profile">
+        <div className="tb-avatar">AC</div>
+        <div className="tb-profile-name" style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Alex Chen</div>
+          <div style={{ fontSize: 11, color: 'var(--tb-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>alex@timebudget.app</div>
+        </div>
+      </div>
+    </div>
+  </aside>;
+
+
+const TopNav = ({ screen, go }) =>
+<div className="tb-topnav">
+    <div className="tb-topnav-brand">
+      <span className="tb-sidebar-logo-mark">T</span>
+      <span>Timebudget</span>
+    </div>
+    <nav className="tb-topnav-nav">
+      {NAV_ITEMS.map((it) =>
+    <button key={it.id} className={`tb-nav-item ${screen === it.id ? 'active' : ''}`} onClick={() => go(it.id)}>
+          <span>{it.label}</span>
+        </button>
+    )}
+    </nav>
+    <div className="tb-row tb-gap-3">
+      <button className="tb-btn-icon"><Icon name="search" size={18} /></button>
+      <div className="tb-avatar">AC</div>
+    </div>
+  </div>;
+
+
+const BottomNav = ({ screen, go }) =>
+<nav className="tb-bottomnav">
+    {NAV_ITEMS.map((it) =>
+  <button key={it.id} className={screen === it.id ? 'active' : ''} onClick={() => go(it.id)}>
+        <span className="icon"><Icon name={it.icon} size={20} /></span>
+        <span>{it.label}</span>
+      </button>
+  )}
+  </nav>;
+
+
+// ============ Reducer ============
+const initialState = {
+  screen: 'dashboard',
+  tasks: SAMPLE_TASKS,
+  budgetMins: 8 * 60,
+  startTime: '09:00',
+  endTime: '17:00',
+  selectedDay: 3,
+  viewMode: 'list',
+  modal: null, // 'time' | 'task'
+  editTask: null,
+  starts: {}, // task id -> start offset mins
+  analyticsTaskId: 't1',
+  hasSetup: true // toggled to false to show empty state
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'GO':return { ...state, screen: action.screen };
+    case 'GO_ANALYTICS':return { ...state, screen: 'analytics', analyticsTaskId: action.taskId };
+    case 'SET_DAY':return { ...state, selectedDay: action.i };
+    case 'PREV_WEEK':case 'NEXT_WEEK':return state; // no-op visual only
+    case 'SET_VIEW':return { ...state, viewMode: action.mode };
+    case 'OPEN_TIME':return { ...state, modal: 'time' };
+    case 'OPEN_TASK':return { ...state, modal: 'task', editTask: action.task };
+    case 'CLOSE_MODAL':return { ...state, modal: null, editTask: null };
+    case 'SAVE_TIME':{
+        const [sh, sm] = action.start.split(':').map(Number);
+        const [eh, em] = action.end.split(':').map(Number);
+        const mins = Math.max(0, eh * 60 + em - (sh * 60 + sm));
+        return { ...state, startTime: action.start, endTime: action.end, budgetMins: mins, modal: null, hasSetup: true };
+      }
+    case 'SAVE_TASK':{
+        const t = action.task;
+        if (t.id) {
+          return { ...state, tasks: state.tasks.map((x) => x.id === t.id ? { ...x, ...t } : x), modal: null, editTask: null };
+        }
+        const newTask = { ...t, id: 't' + Date.now(), done: false, weekHrs: 0, freq: 0 };
+        return { ...state, tasks: [...state.tasks, newTask], modal: null, editTask: null };
+      }
+    case 'DELETE_TASK':
+      return { ...state, tasks: state.tasks.filter((t) => t.id !== action.id), modal: null, editTask: null };
+    case 'TOGGLE_TASK':
+      return { ...state, tasks: state.tasks.map((t) => t.id === action.id ? { ...t, done: !t.done } : t) };
+    case 'REORDER_TASKS':
+      return { ...state, tasks: action.tasks };
+    case 'SET_START':
+      return { ...state, starts: { ...state.starts, [action.id]: action.mins } };
+    case 'RESET_EMPTY':
+      return { ...state, hasSetup: false, tasks: [] };
+    case 'SET_BUDGET':
+      return { ...state, budgetMins: action.mins };
+    default:return state;
+  }
+}
+
+// ============ App root ============
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "variant": "calm",
+  "primary": "#4A6FE3",
+  "accent": "#3DCBC9",
+  "showEmpty": false
+} /*EDITMODE-END*/;
+
+function App() {
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // Apply tweaks to CSS variables
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--tb-primary', t.primary);
+    root.style.setProperty('--tb-accent', t.accent);
+    // soft variant of primary
+    root.style.setProperty('--tb-primary-soft', mixWithWhite(t.primary, 0.88));
+    root.style.setProperty('--tb-primary-deep', darken(t.primary, 0.15));
+  }, [t.primary, t.accent]);
+
+  // Apply empty state
+  React.useEffect(() => {
+    if (t.showEmpty) {
+      dispatch({ type: 'RESET_EMPTY' });
+    }
+  }, [t.showEmpty]);
+
+  const go = (screen) => dispatch({ type: 'GO', screen });
+
+  const isHero = t.variant === 'hero';
+
+  const renderScreen = () => {
+    if (!state.hasSetup) return <EmptyState onSetTime={() => dispatch({ type: 'OPEN_TIME' })} />;
+    switch (state.screen) {
+      case 'dashboard':return isHero ? <DashboardHero state={state} dispatch={dispatch} /> : <DashboardCalm state={state} dispatch={dispatch} />;
+      case 'overview':return <TaskOverview state={state} dispatch={dispatch} />;
+      case 'analytics':return <Analytics state={state} dispatch={dispatch} />;
+      case 'settings':return <Settings state={state} dispatch={dispatch} />;
+      default:return null;
+    }
+  };
+
+  const titleMap = {
+    dashboard: { title: '8 June, 2025', sub: 'Wednesday · Plan your day with a time budget' },
+    overview: { title: 'Task overview', sub: 'All activities and their tracked time' },
+    analytics: { title: 'Analytics', sub: 'How you spend your time' },
+    settings: { title: 'Settings', sub: 'Defaults, notifications, and data' }
+  };
+  const meta = titleMap[state.screen] || titleMap.dashboard;
+
+  return (
+    <div className={`tb-app ${isHero ? 'variant-hero' : 'variant-calm'}`}
+    data-screen-label={`Timebudget — ${state.screen}`}>
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        {!isHero && <Sidebar screen={state.screen} go={go} />}
+        <main className="tb-main">
+          {isHero ?
+          <TopNav screen={state.screen} go={go} /> :
+
+          <header className="tb-topbar" data-screen={state.screen} style={{ alignItems: "center" }}>
+              <div className="tb-topbar-title">
+                <h1>{meta.title}</h1>
+                <div className="subtle">{meta.sub}</div>
+              </div>
+              <div className="tb-row tb-gap-3">
+                <button className="tb-btn tb-btn-ghost tb-btn-sm"><Icon name="sun" size={14} /> 9:00 — 17:00</button>
+                <button className="tb-btn tb-btn-primary tb-btn-sm" onClick={() => dispatch({ type: 'OPEN_TASK', task: null })}>
+                  <Icon name="plus" size={14} /> New task
+                </button>
+              </div>
+            </header>
+          }
+          <div className="tb-content" data-comment-anchor="0692eb54c0-div-195-11">
+            {renderScreen()}
+          </div>
+        </main>
+      </div>
+      <BottomNav screen={state.screen} go={go} />
+
+      <SetTimeModal
+        open={state.modal === 'time'}
+        onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
+        onSave={(s, e) => dispatch({ type: 'SAVE_TIME', start: s, end: e })}
+        initial={{ start: state.startTime, end: state.endTime }} />
+      
+      <EditTaskModal
+        open={state.modal === 'task'}
+        onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
+        onSave={(task) => dispatch({ type: 'SAVE_TASK', task })}
+        onDelete={(id) => dispatch({ type: 'DELETE_TASK', id })}
+        task={state.editTask} />
+      
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Layout">
+          <TweakRadio
+            label="Variant"
+            value={t.variant}
+            onChange={(v) => setTweak('variant', v)}
+            options={[
+            { value: 'calm', label: 'Calm' },
+            { value: 'hero', label: 'Hero' }]
+            } />
+          
+          <TweakToggle
+            label="Show empty state"
+            value={t.showEmpty}
+            onChange={(v) => setTweak('showEmpty', v)} />
+          
+        </TweakSection>
+        <TweakSection title="Color">
+          <TweakColor
+            label="Primary"
+            value={t.primary}
+            onChange={(v) => setTweak('primary', v)}
+            options={['#4A6FE3', '#1A1F36', '#3DCBC9', '#7C5CFC', '#E26B6B']} />
+          
+          <TweakColor
+            label="Accent"
+            value={t.accent}
+            onChange={(v) => setTweak('accent', v)}
+            options={['#3DCBC9', '#F5D165', '#F3A266', '#A78BFA', '#4A6FE3']} />
+          
+        </TweakSection>
+      </TweaksPanel>
+    </div>);
+
+}
+
+// ============ Color helpers ============
+function hexToRgb(hex) {
+  const m = hex.replace('#', '');
+  const i = parseInt(m, 16);
+  return { r: i >> 16 & 255, g: i >> 8 & 255, b: i & 255 };
+}
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+}
+function mixWithWhite(hex, amount) {
+  const { r, g, b } = hexToRgb(hex);
+  return rgbToHex(r + (255 - r) * amount, g + (255 - g) * amount, b + (255 - b) * amount);
+}
+function darken(hex, amount) {
+  const { r, g, b } = hexToRgb(hex);
+  return rgbToHex(r * (1 - amount), g * (1 - amount), b * (1 - amount));
+}
+
+// Mount
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
